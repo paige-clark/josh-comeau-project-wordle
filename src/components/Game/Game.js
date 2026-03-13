@@ -2,7 +2,7 @@ import React from "react";
 
 import { sample } from "../../utils";
 import { WORDS } from "../../data";
-import { GUESS_LENGTH } from "../../constants";
+import { NUM_OF_GUESSES_ALLOWED, GUESS_LENGTH } from "../../constants";
 
 // Pick a random word on every pageload.
 const answer = sample(WORDS);
@@ -11,10 +11,50 @@ const answer = sample(WORDS);
 console.info({ answer });
 
 function Game() {
+  const [guesses, setGuesses] = React.useState([
+    {
+      id: crypto.randomUUID(),
+      guess: "bing",
+    },
+  ]);
+
+  function handleSetGuess(guess) {
+    // For now just alert that no more submissions are allowed
+    if (guesses.length >= NUM_OF_GUESSES_ALLOWED) {
+      window.alert("Game is over!");
+      return;
+    }
+
+    const newGuesses = [
+      ...guesses,
+      {
+        id: crypto.randomUUID(),
+        guess: guess,
+      },
+    ];
+
+    setGuesses(newGuesses);
+  }
+
   return (
     <>
-      <GuessInput />
+      <GuessResults guesses={guesses} />
+      <GuessInput handleSetGuess={handleSetGuess} />
     </>
+  );
+}
+
+function GuessResults({ guesses }) {
+  return (
+    <div className="guess-results">
+      {guesses.map((item) => {
+        return (
+          <p key={item.id} className="guess">
+            {item.guess}
+          </p>
+        );
+      })}
+    </div>
   );
 }
 
@@ -23,7 +63,7 @@ const guessErrors = {
   nonLetterChars: "Guess contains non letter characters!",
 };
 
-function GuessInput() {
+function GuessInput({ handleSetGuess }) {
   const [guess, setGuess] = React.useState("");
   const [guessError, setGuessError] = React.useState("");
 
@@ -44,8 +84,7 @@ function GuessInput() {
       return;
     }
 
-    const submission = { guess };
-    console.log(submission);
+    handleSetGuess(guess);
     setGuess("");
   }
 
