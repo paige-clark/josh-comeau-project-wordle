@@ -2,7 +2,7 @@ import React from "react";
 
 import { sample } from "../../utils";
 import { WORDS } from "../../data";
-import { GUESS_LENGTH, MAX_INPUT_CHARS } from "../../constants";
+import { GUESS_LENGTH } from "../../constants";
 
 // Pick a random word on every pageload.
 const answer = sample(WORDS);
@@ -18,13 +18,32 @@ function Game() {
   );
 }
 
+const guessErrors = {
+  tooShort: "Guess is too short!",
+  nonLetterChars: "Guess contains non letter characters!",
+};
+
 function GuessInput() {
   const [guess, setGuess] = React.useState("");
+  const [guessError, setGuessError] = React.useState("");
 
-  const guessPatternRegex = `[a-zA-Z]{${GUESS_LENGTH}}`;
+  function guessIsNotLetters() {
+    return !/^[A-Z]+$/.test(guess);
+  }
 
-  function handleSubmit(event) {
-    event.preventDefault();
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    if (guess.length < GUESS_LENGTH) {
+      setGuessError(guessErrors.tooShort);
+      return;
+    }
+
+    if (guessIsNotLetters()) {
+      setGuessError(guessErrors.nonLetterChars);
+      return;
+    }
+
     const submission = { guess };
     console.log(submission);
     setGuess("");
@@ -36,19 +55,21 @@ function GuessInput() {
       onSubmit={handleSubmit}
       autoComplete="off"
     >
-      <label htmlFor="guess-input">Enter a {GUESS_LENGTH} letter guess: </label>
+      <label htmlFor="guess-input">Enter a {GUESS_LENGTH}-letter guess: </label>
       <input
         required
         id="guess-input"
         type="text"
         maxLength={GUESS_LENGTH}
-        pattern={guessPatternRegex}
         value={guess}
-        onChange={(event) => {
-          const updatedGuess = event.target.value.toUpperCase();
-          setGuess(updatedGuess);
+        onChange={(e) => {
+          setGuess(e.target.value.toUpperCase());
+          setGuessError("");
         }}
       />
+      {guessError !== "" && (
+        <p style={{ alignSelf: "center", color: "red" }}>{guessError}</p>
+      )}
     </form>
   );
 }
