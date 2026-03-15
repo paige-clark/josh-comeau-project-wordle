@@ -1,6 +1,6 @@
 import React from "react";
 
-import { sample } from "../../utils";
+import { range, sample } from "../../utils";
 import { WORDS } from "../../data";
 import { NUM_OF_GUESSES_ALLOWED, GUESS_LENGTH } from "../../constants";
 
@@ -11,12 +11,7 @@ const answer = sample(WORDS);
 console.info({ answer });
 
 function Game() {
-  const [guesses, setGuesses] = React.useState([
-    {
-      id: crypto.randomUUID(),
-      guess: "bing",
-    },
-  ]);
+  const [guesses, setGuesses] = React.useState(["BINGO"]);
 
   function handleSetGuess(guess) {
     // For now just alert that no more submissions are allowed
@@ -25,13 +20,7 @@ function Game() {
       return;
     }
 
-    const newGuesses = [
-      ...guesses,
-      {
-        id: crypto.randomUUID(),
-        guess: guess,
-      },
-    ];
+    const newGuesses = [...guesses, guess];
 
     setGuesses(newGuesses);
   }
@@ -47,14 +36,24 @@ function Game() {
 function GuessResults({ guesses }) {
   return (
     <div className="guess-results">
-      {guesses.map((item) => {
-        return (
-          <p key={item.id} className="guess">
-            {item.guess}
-          </p>
-        );
+      {range(0, NUM_OF_GUESSES_ALLOWED).map((index) => {
+        return <Guess key={index} guess={guesses[index] || ""} />;
       })}
     </div>
+  );
+}
+
+function Guess({ guess }) {
+  return (
+    <p className="guess">
+      {range(0, GUESS_LENGTH).map((index) => {
+        return (
+          <span className="cell" key={index}>
+            {guess[index] || ""}
+          </span>
+        );
+      })}
+    </p>
   );
 }
 
