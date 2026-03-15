@@ -44,15 +44,12 @@ function GuessResults({ guesses }) {
 }
 
 function Guess({ guess }) {
-  // Create an array of letters, or if no guess provided an array of empty strings
-  const letters = range(0, GUESS_LENGTH).map((index) => guess[index] || "");
-
   return (
     <p className="guess">
       {range(0, GUESS_LENGTH).map((index) => {
         return (
           <span className="cell" key={index}>
-            {letters[index]}
+            {guess[index] || ""}
           </span>
         );
       })}
