@@ -3,6 +3,7 @@ import React from "react";
 import { range, sample } from "../../utils";
 import { WORDS } from "../../data";
 import { NUM_OF_GUESSES_ALLOWED, GUESS_LENGTH } from "../../constants";
+import { checkGuess } from "../../game-helpers";
 
 // Pick a random word on every pageload.
 const answer = sample(WORDS);
@@ -37,19 +38,26 @@ function GuessResults({ guesses }) {
   return (
     <div className="guess-results">
       {range(0, NUM_OF_GUESSES_ALLOWED).map((index) => {
-        return <Guess key={index} guess={guesses[index] || ""} />;
+        return <Guess key={index} guess={guesses[index] || null} />;
       })}
     </div>
   );
 }
 
 function Guess({ guess }) {
+  const validatedGuess = guess ? checkGuess(guess, answer) : null;
+
   return (
-    <p className="guess">
+    <p className={"guess"}>
       {range(0, GUESS_LENGTH).map((index) => {
+        const { letter, status } = validatedGuess?.[index] ?? {
+          letter: "",
+          status: "",
+        };
+
         return (
-          <span className="cell" key={index}>
-            {guess[index] || ""}
+          <span className={`cell ${status}`} key={index}>
+            {letter}
           </span>
         );
       })}
