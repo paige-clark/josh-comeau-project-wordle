@@ -11,25 +11,36 @@ const answer = sample(WORDS);
 // To make debugging easier, we'll log the solution in the console.
 console.info({ answer });
 
+const GAME_STATES = {
+  PLAYING: "playing",
+  WIN: "win",
+  LOSE: "lose",
+};
+
 function Game() {
-  const [guesses, setGuesses] = React.useState(["BINGO"]);
+  const [guesses, setGuesses] = React.useState([]);
+  const [gameState, setGameState] = React.useState(GAME_STATES.PLAYING);
 
   function handleSetGuess(guess) {
-    // For now just alert that no more submissions are allowed
-    if (guesses.length >= NUM_OF_GUESSES_ALLOWED) {
-      window.alert("Game is over!");
+    if (gameState !== GAME_STATES.PLAYING) {
       return;
     }
 
     const newGuesses = [...guesses, guess];
-
     setGuesses(newGuesses);
+
+    if (guess === answer) {
+      setGameState(GAME_STATES.WIN);
+    } else if (newGuesses.length === NUM_OF_GUESSES_ALLOWED) {
+      setGameState(GAME_STATES.LOSE);
+    }
   }
 
   return (
     <>
       <GuessResults guesses={guesses} />
-      <GuessInput handleSetGuess={handleSetGuess} />
+      <GuessInput handleSetGuess={handleSetGuess} gameState={gameState} />
+      <Banner gameState={gameState} guessCount={guesses.length} />
     </>
   );
 }
@@ -65,14 +76,14 @@ function Guess({ guess }) {
   );
 }
 
-const guessErrors = {
-  tooShort: "Guess is too short!",
-  nonLetterChars: "Guess contains non letter characters!",
-};
-
-function GuessInput({ handleSetGuess }) {
+function GuessInput({ handleSetGuess, gameState }) {
   const [guess, setGuess] = React.useState("");
   const [guessError, setGuessError] = React.useState("");
+
+  const guessErrors = {
+    tooShort: "Guess is too short!",
+    nonLetterChars: "Guess contains non letter characters!",
+  };
 
   function guessIsNotLetters() {
     return !/^[A-Z]+$/.test(guess);
@@ -104,6 +115,7 @@ function GuessInput({ handleSetGuess }) {
       <label htmlFor="guess-input">Enter a {GUESS_LENGTH}-letter guess: </label>
       <input
         required
+        disabled={gameState !== GAME_STATES.PLAYING}
         id="guess-input"
         type="text"
         maxLength={GUESS_LENGTH}
@@ -118,6 +130,31 @@ function GuessInput({ handleSetGuess }) {
       )}
     </form>
   );
+}
+
+function Banner({ gameState, guessCount }) {
+  if (gameState === GAME_STATES.WIN) {
+    return (
+      <div className="happy banner">
+        <p>
+          <strong>Congratulations!</strong> Got it in{" "}
+          <strong>{guessCount} guesses</strong>.
+        </p>
+      </div>
+    );
+  }
+
+  if (gameState === GAME_STATES.LOSE) {
+    return (
+      <div className="sad banner">
+        <p>
+          Sorry, the correct answer is <strong>{answer}</strong>.
+        </p>
+      </div>
+    );
+  }
+
+  return null;
 }
 
 export default Game;
